@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Backend.DataBase.Entity;
 using Backend.DataBase.Model;
+using Backend.DataBase.Request;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Backend.Controllers
 {
@@ -20,24 +24,26 @@ namespace Backend.Controllers
         {
             _context = context;
         }
-        
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUser()
         {
-          if (_context.User == null)
-          {
-              return NotFound();
-          }
+            if (_context.User == null)
+            {
+                return NotFound();
+            }
+
             return await _context.User.ToListAsync();
         }
-        
+
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-          if (_context.User == null)
-          {
-              return NotFound();
-          }
+            if (_context.User == null)
+            {
+                return NotFound();
+            }
+
             var user = await _context.User.FindAsync(id);
 
             if (user == null)
@@ -47,67 +53,58 @@ namespace Backend.Controllers
 
             return user;
         }
-        
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
-        {
-            if (id != user.Id)
-            {
-                return BadRequest();
-            }
 
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-        
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
-          if (_context.User == null)
-          {
-              return Problem("Entity set 'AppDbContext.User'  is null.");
-          }
+            if (_context.User == null)
+            {
+                return Problem("Entity set 'AppDbContext.User'  is null.");
+            }
+
             _context.User.Add(user);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
 
-        // DELETE: api/User/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        [HttpPost("register")]
+        public async Task<ActionResult> RegisterUser([FromBody] UserRequest userRequest)
         {
-            if (_context.User == null)
+            if (await _context.User.AnyAsync(u => u.Login == userRequest.Login || u.Mail == userRequest.Mail))
             {
-                return NotFound();
-            }
-            var user = await _context.User.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
+                return BadRequest("Почта или логин заняты");
             }
 
-            _context.User.Remove(user);
+            var entity = new User
+            {
+                Login = userRequest.Login,
+                Password = userRequest.Password,
+                Mail = userRequest.Mail,
+                Avatar = userRequest.Avatar,
+                Role = userRequest.Role
+            };
+
+            _context.User.Add(entity);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, entity.Id.ToString()),
+                new Claim(ClaimTypes.Name, entity.Login),
+                new Claim(ClaimTypes.Email, entity.Mail),
+                new Claim(ClaimTypes.Uri, entity.Avatar),
+                new Claim(ClaimTypes.Role, entity.Role),
+            };
+
+            var indentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(indentity);
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            userRequest.Role = "Developer";
+
+            return Ok("Регистрация прошла успешно");
         }
 
         private bool UserExists(int id)
