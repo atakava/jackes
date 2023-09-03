@@ -19,10 +19,12 @@ namespace Backend.Controllers
     public class UserController : ControllerBase
     {
         private readonly AppDbContext _context;
-
-        public UserController(AppDbContext context)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        
+        public UserController(AppDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [HttpGet]
@@ -141,6 +143,42 @@ namespace Backend.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return Ok("Вы успешно вышли из аккаунта");
+        }
+
+        [HttpPost("update-user{id}")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateUser(int id, [FromForm] UpdateUserRequest updateUserRequest)
+        {
+            var user = await _context.User.FindAsync(id);
+
+            if (user != null)
+            {
+                user.Mail = updateUserRequest.Mail ?? user.Mail;
+                user.Role = updateUserRequest.Role ?? user.Role;
+                user.Login = updateUserRequest.Login ?? user.Login;
+            }
+
+            if (updateUserRequest.Avatar != null)
+            {
+                var fileExentions = Path.GetExtension(updateUserRequest.Avatar.FileName);
+
+                var wwwRootPath = _webHostEnvironment.WebRootPath;
+                var avatarsPath = Path.Combine(wwwRootPath, "img");
+                var avatarName = $"{Guid.NewGuid().ToString()}_{fileExentions}";
+                var avatarPath = Path.Combine(avatarsPath, avatarName);
+
+                using (var stream = new FileStream(avatarPath, FileMode.Create))
+                {
+                    await updateUserRequest.Avatar.CopyToAsync(stream);
+                }
+
+                user.Avatar = $"images/{avatarName}";
+            }
+
+            _context.User.Update(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(user);
         }
 
         private bool UserExists(int id)

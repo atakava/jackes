@@ -1,11 +1,19 @@
 {
   "Version": 1,
-  "Hash": "n5xgAQ6zUIaWw0GRiBAnxS+iKccCeaRf+F00sBYdNq4=",
+  "Hash": "wKMPCN65xlyOs1w4jpg0z2k9b0P7eSdYF1Nqv2ru+2k=",
   "Source": "Backend",
   "BasePath": "_content/Backend",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "Backend\\wwwroot",
+      "Source": "Backend",
+      "ContentRoot": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\",
+      "BasePath": "_content/Backend",
+      "Pattern": "**"
+    }
+  ],
   "Assets": []
 }

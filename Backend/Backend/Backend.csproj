@@ -24,6 +24,7 @@
     <ItemGroup>
       <Folder Include="Controllers\" />
       <Folder Include="DataBase\Response\" />
+      <Folder Include="wwwroot\img\" />
     </ItemGroup>
 
 </Project>
