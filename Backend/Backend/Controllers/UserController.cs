@@ -107,6 +107,42 @@ namespace Backend.Controllers
             return Ok("Регистрация прошла успешно");
         }
 
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginUser([FromBody] UserRequest userRequest)
+        {
+            var authUser =
+                await _context.User.FirstOrDefaultAsync(u =>
+                    u.Login == userRequest.Login && u.Password == userRequest.Password);
+
+            if (authUser == null)
+            {
+                return BadRequest("Не верный логин или пароль");
+            }
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, authUser.Id.ToString()),
+                new Claim(ClaimTypes.Name, authUser.Login),
+                new Claim(ClaimTypes.Email, authUser.Mail),
+                new Claim(ClaimTypes.Role, authUser.Role),
+                new Claim(ClaimTypes.Uri, authUser.Avatar),
+            };
+
+            var indentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(indentity);
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            return Ok("Вы успешно зашли в аккаунт");
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> LogoutUser()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return Ok("Вы успешно вышли из аккаунта");
+        }
+
         private bool UserExists(int id)
         {
             return (_context.User?.Any(e => e.Id == id)).GetValueOrDefault();
