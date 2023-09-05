@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Backend.DataBase.Entity;
 using Backend.DataBase.Model;
+using Backend.DataBase.Request;
 
 namespace Backend.Controllers
 {
@@ -21,25 +23,25 @@ namespace Backend.Controllers
             _context = context;
         }
 
-        // GET: api/Post
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Post>>> GetPosts()
         {
-          if (_context.Posts == null)
-          {
-              return NotFound();
-          }
+            if (_context.Posts == null)
+            {
+                return NotFound();
+            }
+
             return await _context.Posts.ToListAsync();
         }
 
-        // GET: api/Post/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Post>> GetPost(int id)
         {
-          if (_context.Posts == null)
-          {
-              return NotFound();
-          }
+            if (_context.Posts == null)
+            {
+                return NotFound();
+            }
+
             var post = await _context.Posts.FindAsync(id);
 
             if (post == null)
@@ -50,8 +52,6 @@ namespace Backend.Controllers
             return post;
         }
 
-        // PUT: api/Post/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPost(int id, Post post)
         {
@@ -81,22 +81,39 @@ namespace Backend.Controllers
             return NoContent();
         }
 
-        // POST: api/Post
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Post>> PostPost(Post post)
         {
-          if (_context.Posts == null)
-          {
-              return Problem("Entity set 'AppDbContext.Posts'  is null.");
-          }
+            if (_context.Posts == null)
+            {
+                return Problem("Entity set 'AppDbContext.Posts'  is null.");
+            }
+
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetPost", new { id = post.IdPosts }, post);
         }
 
-        // DELETE: api/Post/5
+        [HttpPost("created-post-user{id}")]
+        public async Task<IActionResult> CreatedPost(int id, [FromBody] PostRequest postRequest)
+        {
+            var user = await _context.User.FindAsync(id);
+            
+            var newPost = new Post
+            {
+                CreatedAt = DateTime.UtcNow,
+                User = user,
+                Title = postRequest.Title,
+                Text = postRequest.Text
+            };
+
+            _context.Posts.Add(newPost);
+            await _context.SaveChangesAsync();
+
+            return Ok(newPost);
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePost(int id)
         {
@@ -104,6 +121,7 @@ namespace Backend.Controllers
             {
                 return NotFound();
             }
+
             var post = await _context.Posts.FindAsync(id);
             if (post == null)
             {

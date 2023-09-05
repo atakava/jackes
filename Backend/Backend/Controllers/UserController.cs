@@ -20,7 +20,7 @@ namespace Backend.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        
+
         public UserController(AppDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
@@ -55,6 +55,20 @@ namespace Backend.Controllers
 
             return user;
         }
+        
+        [HttpGet("current-user")]
+        public async Task<IActionResult> CurrentUser()
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var currentUser = await _context.User.FirstOrDefaultAsync(i => i.IdUser == int.Parse(userId));
+
+            return Ok(currentUser);
+        }
 
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
@@ -67,7 +81,7 @@ namespace Backend.Controllers
             _context.User.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            return CreatedAtAction("GetUser", new { id = user.IdUser }, user);
         }
 
         [HttpPost("register")]
@@ -92,7 +106,7 @@ namespace Backend.Controllers
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, entity.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, entity.IdUser.ToString()),
                 new Claim(ClaimTypes.Name, entity.Login),
                 new Claim(ClaimTypes.Email, entity.Mail),
                 new Claim(ClaimTypes.Uri, entity.Avatar),
@@ -123,7 +137,7 @@ namespace Backend.Controllers
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, authUser.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, authUser.IdUser.ToString()),
                 new Claim(ClaimTypes.Name, authUser.Login),
                 new Claim(ClaimTypes.Email, authUser.Mail),
                 new Claim(ClaimTypes.Role, authUser.Role),
@@ -181,9 +195,30 @@ namespace Backend.Controllers
             return Ok(user);
         }
 
+        [HttpDelete("deleted-user{id}")]
+        public async Task<IActionResult> DeletedUser(int id)
+        {
+            if (_context.User == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.User.FindAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            _context.User.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
         private bool UserExists(int id)
         {
-            return (_context.User?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.User?.Any(e => e.IdUser == id)).GetValueOrDefault();
         }
     }
 }
