@@ -103,6 +103,7 @@ namespace Backend.Controllers
             var newPost = new Post
             {
                 CreatedAt = DateTime.UtcNow,
+                IdUser = id,
                 User = user,
                 Title = postRequest.Title,
                 Text = postRequest.Text
