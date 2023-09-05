@@ -52,6 +52,20 @@ namespace Backend.Controllers
             return post;
         }
 
+        [HttpGet("posts-user{idUser}")]
+        public async Task<IActionResult> GetPostUser(int idUser)
+        {
+            var posts = await _context.Posts.Where(p => p.IdUser == idUser).ToListAsync();
+
+            if (posts == null || posts.Count == 0)
+            {
+                return NotFound("Посты пользователя не найдены");
+            }
+
+            return Ok(posts);
+        }
+        
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPost(int id, Post post)
         {
