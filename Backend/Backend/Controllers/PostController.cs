@@ -55,7 +55,7 @@ namespace Backend.Controllers
         [HttpGet("posts-user{idUser}")]
         public async Task<IActionResult> GetPostUser(int idUser)
         {
-            var posts = await _context.Posts.Where(p => p.IdUser == idUser).ToListAsync();
+            var posts = await _context.Posts.Include(p => p.User).Where(p => p.IdUser == idUser).ToListAsync();
 
             if (posts == null || posts.Count == 0)
             {
@@ -113,6 +113,11 @@ namespace Backend.Controllers
         public async Task<IActionResult> CreatedPost(int id, [FromBody] PostRequest postRequest)
         {
             var user = await _context.User.FindAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
             
             var newPost = new Post
             {
