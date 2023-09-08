@@ -7,11 +7,14 @@ public class User
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int IdUser { get; set; }
+    public int Id { get; set; }
+
     public string Login { get; set; }
     public string Mail { get; set; }
     public string Password { get; set; }
     public string Avatar { get; set; }
     public string? Role { get; set; }
-    public ICollection<Comment>? Comments { get; set; }
+    
+    public ICollection<Post> Posts { get; set; }
+    public ICollection<Comment> Comments { get; set; }
 }

@@ -52,24 +52,23 @@ namespace Backend.Controllers
             return post;
         }
 
-        [HttpGet("posts-user{idUser}")]
-        public async Task<IActionResult> GetPostUser(int idUser)
-        {
-            var posts = await _context.Posts.Include(p => p.User).Where(p => p.IdUser == idUser).ToListAsync();
-
-            if (posts == null || posts.Count == 0)
-            {
-                return NotFound("Посты пользователя не найдены");
-            }
-
-            return Ok(posts);
-        }
-        
+        // [HttpGet("posts-user{idUser}")]
+        // public async Task<IActionResult> GetPostUser(int idUser)
+        // {
+        //     var posts = await _context.Posts.Include(p => p.User).Where(p => p.IdUser == idUser).ToListAsync();
+        //
+        //     if (posts == null || posts.Count == 0)
+        //     {
+        //         return NotFound("Посты пользователя не найдены");
+        //     }
+        //
+        //     return Ok(posts);
+        // }
         
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPost(int id, Post post)
         {
-            if (id != post.IdPosts)
+            if (id != post.Id)
             {
                 return BadRequest();
             }
@@ -106,14 +105,17 @@ namespace Backend.Controllers
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPost", new { id = post.IdPosts }, post);
+            return CreatedAtAction("GetPost", new { id = post.Id }, post);
         }
 
         [HttpPost("created-post-user{id}")]
         public async Task<IActionResult> CreatedPost(int id, [FromBody] PostRequest postRequest)
         {
             var user = await _context.User.FindAsync(id);
-
+            var coments = await _context.Posts
+                .Include(i => i.Comments)
+                .FirstOrDefaultAsync(i => i.Id == id);
+            
             if (user == null)
             {
                 return NotFound();
@@ -122,8 +124,7 @@ namespace Backend.Controllers
             var newPost = new Post
             {
                 CreatedAt = DateTime.UtcNow,
-                IdUser = id,
-                User = user,
+                UserId = id,
                 Title = postRequest.Title,
                 Text = postRequest.Text
             };
@@ -156,7 +157,7 @@ namespace Backend.Controllers
 
         private bool PostExists(int id)
         {
-            return (_context.Posts?.Any(e => e.IdPosts == id)).GetValueOrDefault();
+            return (_context.Posts?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

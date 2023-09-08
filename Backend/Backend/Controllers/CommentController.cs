@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Backend.DataBase.Entity;
 using Backend.DataBase.Model;
+using Backend.DataBase.Request;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Backend.Controllers
 {
@@ -21,25 +24,25 @@ namespace Backend.Controllers
             _context = context;
         }
 
-        // GET: api/Comment
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Comment>>> GetComment()
         {
-          if (_context.Comment == null)
-          {
-              return NotFound();
-          }
+            if (_context.Comment == null)
+            {
+                return NotFound();
+            }
+
             return await _context.Comment.ToListAsync();
         }
 
-        // GET: api/Comment/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Comment>> GetComment(int id)
         {
-          if (_context.Comment == null)
-          {
-              return NotFound();
-          }
+            if (_context.Comment == null)
+            {
+                return NotFound();
+            }
+
             var comment = await _context.Comment.FindAsync(id);
 
             if (comment == null)
@@ -50,12 +53,10 @@ namespace Backend.Controllers
             return comment;
         }
 
-        // PUT: api/Comment/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutComment(int id, Comment comment)
         {
-            if (id != comment.CommentId)
+            if (id != comment.Id)
             {
                 return BadRequest();
             }
@@ -81,22 +82,55 @@ namespace Backend.Controllers
             return NoContent();
         }
 
-        // POST: api/Comment
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Comment>> PostComment(Comment comment)
         {
-          if (_context.Comment == null)
-          {
-              return Problem("Entity set 'AppDbContext.Comment'  is null.");
-          }
+            if (_context.Comment == null)
+            {
+                return Problem("Entity set 'AppDbContext.Comment'  is null.");
+            }
+
             _context.Comment.Add(comment);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetComment", new { id = comment.CommentId }, comment);
+            return CreatedAtAction("GetComment", new { id = comment.Id }, comment);
         }
 
-        // DELETE: api/Comment/5
+        [HttpPost("created-comment{IdPost}/user-{idUser}")]
+        public async Task<IActionResult> CreatedComment(int IdPost,int idUser, [FromBody] CommentRequest commentRequest)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var postValid = await _context.Posts.FirstOrDefaultAsync(p => p.Id == IdPost);
+            var userValid = await _context.User.FirstOrDefaultAsync(p => p.Id == idUser);
+            
+            if (postValid == null)
+            {
+                return NotFound("Пост не найден");
+            }
+
+            if (userValid == null)
+            {
+                return NotFound("Пользователя не существует");
+            } 
+
+            var newComment = new Comment
+            {
+                Text = commentRequest.Text,
+                CreatedAt = DateTime.UtcNow,
+                PostId = IdPost,
+                UserId = idUser,
+            };
+            
+            _context.Comment.Add(newComment);
+            await _context.SaveChangesAsync();
+            
+            return Ok(newComment);
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComment(int id)
         {
@@ -104,6 +138,7 @@ namespace Backend.Controllers
             {
                 return NotFound();
             }
+
             var comment = await _context.Comment.FindAsync(id);
             if (comment == null)
             {
@@ -118,7 +153,7 @@ namespace Backend.Controllers
 
         private bool CommentExists(int id)
         {
-            return (_context.Comment?.Any(e => e.CommentId == id)).GetValueOrDefault();
+            return (_context.Comment?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

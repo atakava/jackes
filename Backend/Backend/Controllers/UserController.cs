@@ -55,7 +55,7 @@ namespace Backend.Controllers
 
             return user;
         }
-        
+
         [HttpGet("current-user")]
         public async Task<IActionResult> CurrentUser()
         {
@@ -65,7 +65,10 @@ namespace Backend.Controllers
             }
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var currentUser = await _context.User.FirstOrDefaultAsync(i => i.IdUser == int.Parse(userId));
+            var currentUser = await _context.User
+                .Include(u => u.Comments)
+                .Include(u => u.Posts)
+                .FirstOrDefaultAsync(i => i.Id == int.Parse(userId));
 
             return Ok(currentUser);
         }
@@ -81,7 +84,7 @@ namespace Backend.Controllers
             _context.User.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.IdUser }, user);
+            return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
 
         [HttpPost("register")]
@@ -98,7 +101,7 @@ namespace Backend.Controllers
                 Password = userRequest.Password,
                 Mail = userRequest.Mail,
                 Avatar = userRequest.Avatar,
-                Role = userRequest.Role
+                Role = userRequest.Role,
             };
 
             _context.User.Add(entity);
@@ -106,7 +109,7 @@ namespace Backend.Controllers
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, entity.IdUser.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, entity.Id.ToString()),
                 new Claim(ClaimTypes.Name, entity.Login),
                 new Claim(ClaimTypes.Email, entity.Mail),
                 new Claim(ClaimTypes.Uri, entity.Avatar),
@@ -137,7 +140,7 @@ namespace Backend.Controllers
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, authUser.IdUser.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, authUser.Id.ToString()),
                 new Claim(ClaimTypes.Name, authUser.Login),
                 new Claim(ClaimTypes.Email, authUser.Mail),
                 new Claim(ClaimTypes.Role, authUser.Role),
@@ -218,7 +221,7 @@ namespace Backend.Controllers
 
         private bool UserExists(int id)
         {
-            return (_context.User?.Any(e => e.IdUser == id)).GetValueOrDefault();
+            return (_context.User?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
