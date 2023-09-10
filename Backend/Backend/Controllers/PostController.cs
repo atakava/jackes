@@ -42,7 +42,7 @@ namespace Backend.Controllers
                 return NotFound();
             }
 
-            var post = await _context.Posts.FindAsync(id);
+            var post = await _context.Posts.Include(p => p.Comments).FirstOrDefaultAsync(p => p.Id == id);
 
             if (post == null)
             {
@@ -51,19 +51,6 @@ namespace Backend.Controllers
 
             return post;
         }
-
-        // [HttpGet("posts-user{idUser}")]
-        // public async Task<IActionResult> GetPostUser(int idUser)
-        // {
-        //     var posts = await _context.Posts.Include(p => p.User).Where(p => p.IdUser == idUser).ToListAsync();
-        //
-        //     if (posts == null || posts.Count == 0)
-        //     {
-        //         return NotFound("Посты пользователя не найдены");
-        //     }
-        //
-        //     return Ok(posts);
-        // }
         
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPost(int id, Post post)
@@ -112,9 +99,6 @@ namespace Backend.Controllers
         public async Task<IActionResult> CreatedPost(int id, [FromBody] PostRequest postRequest)
         {
             var user = await _context.User.FindAsync(id);
-            var coments = await _context.Posts
-                .Include(i => i.Comments)
-                .FirstOrDefaultAsync(i => i.Id == id);
             
             if (user == null)
             {
