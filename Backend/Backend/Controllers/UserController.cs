@@ -100,8 +100,8 @@ namespace Backend.Controllers
                 Login = userRequest.Login,
                 Password = userRequest.Password,
                 Mail = userRequest.Mail,
-                Avatar = userRequest.Avatar,
-                Role = userRequest.Role,
+                Avatar = "q",
+                Role = "User",
             };
 
             _context.User.Add(entity);
@@ -120,8 +120,6 @@ namespace Backend.Controllers
             var principal = new ClaimsPrincipal(indentity);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-            userRequest.Role = "Developer";
 
             return Ok("Регистрация прошла успешно");
         }

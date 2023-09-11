@@ -28,7 +28,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors(builder =>
 {
-    builder.WithOrigins();
+    builder.WithOrigins("http://localhost:8080");
     builder.AllowAnyHeader();
     builder.AllowAnyMethod();
     builder.AllowCredentials();
