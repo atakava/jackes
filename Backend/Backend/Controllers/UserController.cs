@@ -100,7 +100,7 @@ namespace Backend.Controllers
                 Login = userRequest.Login,
                 Password = userRequest.Password,
                 Mail = userRequest.Mail,
-                Avatar = "q",
+                Avatar = "http://localhost:5273/img/29acce9d-9d4f-4583-b2f2-319a3b58134c_.jpg",
                 Role = "User",
             };
 
@@ -169,7 +169,6 @@ namespace Backend.Controllers
             if (user != null)
             {
                 user.Mail = updateUserRequest.Mail ?? user.Mail;
-                user.Role = updateUserRequest.Role ?? user.Role;
                 user.Login = updateUserRequest.Login ?? user.Login;
             }
 
@@ -187,7 +186,7 @@ namespace Backend.Controllers
                     await updateUserRequest.Avatar.CopyToAsync(stream);
                 }
 
-                user.Avatar = $"images/{avatarName}";
+                user.Avatar = $"http://localhost:5273/img/{avatarName}";
             }
 
             _context.User.Update(user);

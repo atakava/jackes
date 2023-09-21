@@ -51,7 +51,7 @@ namespace Backend.Controllers
 
             return post;
         }
-        
+
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPost(int id, Post post)
         {
@@ -96,22 +96,45 @@ namespace Backend.Controllers
         }
 
         [HttpPost("created-post-user{id}")]
-        public async Task<IActionResult> CreatedPost(int id, [FromBody] PostRequest postRequest)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreatedPost(int id, [FromForm] PostRequest postRequest)
         {
             var user = await _context.User.FindAsync(id);
-            
+
             if (user == null)
             {
                 return NotFound();
             }
-            
+
             var newPost = new Post
             {
                 CreatedAt = DateTime.UtcNow,
                 UserId = id,
                 Title = postRequest.Title,
-                Text = postRequest.Text
+                Text = postRequest.Text,
+                StatusPost = StatusPost.Active
             };
+
+            if (postRequest.Imgs != null && postRequest.Imgs.Any())
+            {
+                newPost.Imgs = new List<string>();
+
+                foreach (var imgFile in postRequest.Imgs)
+                {
+                    if (imgFile.Length > 0)
+                    {
+                        var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetExtension(imgFile.FileName);
+
+                        var filePath = Path.Combine("wwwroot/img", uniqueFileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await imgFile.CopyToAsync(stream);
+                        }
+                        
+                        newPost.Imgs.Add(uniqueFileName);
+                    }
+                }
+            }
 
             _context.Posts.Add(newPost);
             await _context.SaveChangesAsync();

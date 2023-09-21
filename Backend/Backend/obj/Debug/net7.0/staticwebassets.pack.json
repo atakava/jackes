@@ -1,12 +1,28 @@
 {
   "Files": [
     {
-      "Id": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\img\\1d243e5f-5b0a-4c2f-b3e9-9057e2c1012b_.jpg",
-      "PackagePath": "staticwebassets\\img\\1d243e5f-5b0a-4c2f-b3e9-9057e2c1012b_.jpg"
+      "Id": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\img\\29acce9d-9d4f-4583-b2f2-319a3b58134c_.jpg",
+      "PackagePath": "staticwebassets\\img\\29acce9d-9d4f-4583-b2f2-319a3b58134c_.jpg"
     },
     {
-      "Id": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\img\\67569ae9-bd11-44ae-942f-4e778302a5af_.jpg",
-      "PackagePath": "staticwebassets\\img\\67569ae9-bd11-44ae-942f-4e778302a5af_.jpg"
+      "Id": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\img\\4d9c0c1e-864d-4e8e-8ff0-3405a5183870_.jpg",
+      "PackagePath": "staticwebassets\\img\\4d9c0c1e-864d-4e8e-8ff0-3405a5183870_.jpg"
+    },
+    {
+      "Id": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\img\\567ed348-5c2f-4654-b4f7-00cd3a61b2f5_.png",
+      "PackagePath": "staticwebassets\\img\\567ed348-5c2f-4654-b4f7-00cd3a61b2f5_.png"
+    },
+    {
+      "Id": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\img\\655edace-96a3-499e-8d22-10c634ee82c2_.jpg",
+      "PackagePath": "staticwebassets\\img\\655edace-96a3-499e-8d22-10c634ee82c2_.jpg"
+    },
+    {
+      "Id": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\img\\8955cdad-f60d-4ab5-b05b-62bf045f222b_.png",
+      "PackagePath": "staticwebassets\\img\\8955cdad-f60d-4ab5-b05b-62bf045f222b_.png"
+    },
+    {
+      "Id": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\img\\c7f21525-d24f-48fb-9dec-83d8dd3a112f_.jpg",
+      "PackagePath": "staticwebassets\\img\\c7f21525-d24f-48fb-9dec-83d8dd3a112f_.jpg"
     },
     {
       "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.Backend.Microsoft.AspNetCore.StaticWebAssets.props",
