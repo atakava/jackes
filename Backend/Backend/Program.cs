@@ -22,8 +22,8 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.Ugger();
-    app.UseSwaseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseCors(builder =>

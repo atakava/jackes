@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Backend.DataBase.Entity;
@@ -160,7 +155,7 @@ namespace Backend.Controllers
             return Ok("Вы успешно вышли из аккаунта");
         }
 
-        [HttpPost("update-user{id}")]
+        [HttpPost("update-user/{id}")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdateUser(int id, [FromForm] UpdateUserRequest updateUserRequest)
         {
@@ -195,7 +190,7 @@ namespace Backend.Controllers
             return Ok(user);
         }
 
-        [HttpDelete("deleted-user{id}")]
+        [HttpDelete("deleted-user/{id}")]
         public async Task<IActionResult> DeletedUser(int id)
         {
             if (_context.User == null)

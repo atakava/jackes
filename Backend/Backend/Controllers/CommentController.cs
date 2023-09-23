@@ -1,15 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Backend.DataBase.Entity;
 using Backend.DataBase.Model;
 using Backend.DataBase.Request;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Backend.Controllers
 {
@@ -25,79 +18,29 @@ namespace Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetComment()
+        public async Task<ActionResult<IEnumerable<Comment>>> GetAllComment()
         {
-            if (_context.Comment == null)
+            var comment = await _context.Comment.ToListAsync();
+            return Ok(comment);
+        }
+
+        [HttpGet("user/{id}/comments")]
+        public async Task<IActionResult> GetUserComments(int id)
+        {
+            var userComments = _context.Comment.Where(u => u.UserId == id);
+
+            if (userComments == null)
             {
                 return NotFound();
             }
 
-            return await _context.Comment.ToListAsync();
-        }
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Comment>> GetComment(int id)
-        {
-            if (_context.Comment == null)
-            {
-                return NotFound();
-            }
-
-            var comment = await _context.Comment.FindAsync(id);
-
-            if (comment == null)
-            {
-                return NotFound();
-            }
-
-            return comment;
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutComment(int id, Comment comment)
-        {
-            if (id != comment.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(comment).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CommentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<Comment>> PostComment(Comment comment)
-        {
-            if (_context.Comment == null)
-            {
-                return Problem("Entity set 'AppDbContext.Comment'  is null.");
-            }
-
-            _context.Comment.Add(comment);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetComment", new { id = comment.Id }, comment);
+            return Ok(userComments);
         }
 
         [HttpPost("created-comment{IdPost}/user-{idUser}")]
-        public async Task<IActionResult> CreatedComment(int IdPost,int idUser, [FromBody] CommentRequest commentRequest)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreatedComment(int IdPost, int idUser,
+            [FromForm] CommentRequest commentRequest)
         {
             if (!ModelState.IsValid)
             {
@@ -106,7 +49,7 @@ namespace Backend.Controllers
 
             var postValid = await _context.Posts.FirstOrDefaultAsync(p => p.Id == IdPost);
             var userValid = await _context.User.FirstOrDefaultAsync(p => p.Id == idUser);
-            
+
             if (postValid == null)
             {
                 return NotFound("Пост не найден");
@@ -115,7 +58,7 @@ namespace Backend.Controllers
             if (userValid == null)
             {
                 return NotFound("Пользователя не существует");
-            } 
+            }
 
             var newComment = new Comment
             {
@@ -123,30 +66,94 @@ namespace Backend.Controllers
                 CreatedAt = DateTime.UtcNow,
                 PostId = IdPost,
                 UserId = idUser,
+                UserName = userValid.Login,
+                UserAvatar = userValid.Avatar
             };
-            
+
+            if (commentRequest.Imgs != null && commentRequest.Imgs.Any())
+            {
+                newComment.Imgs = new List<string>();
+
+                foreach (var imgFile in commentRequest.Imgs)
+                {
+                    if (imgFile.Length > 0)
+                    {
+                        var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetExtension(imgFile.FileName);
+
+                        var filePath = Path.Combine("wwwroot/img", uniqueFileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await imgFile.CopyToAsync(stream);
+                        }
+
+                        newComment.Imgs.Add("http://localhost:5273/img/" + uniqueFileName);
+                    }
+                }
+            }
+
             _context.Comment.Add(newComment);
             await _context.SaveChangesAsync();
-            
+
             return Ok(newComment);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteComment(int id)
+        [HttpPost("update/user/{userId}/post/{postId}/comment/{commentId}")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateComment(int userId, int postId, int commentId,
+            [FromForm] CommentUpdateRequest commentUpdateRequest)
         {
-            if (_context.Comment == null)
+            var user = await _context.User.FindAsync(userId);
+            var post = await _context.Posts.FindAsync(postId);
+            var comment = await _context.Comment.FindAsync(commentId);
+
+            if (user == null || post == null || comment == null)
             {
                 return NotFound();
             }
 
+            if (commentUpdateRequest.ImgIndex != null && commentUpdateRequest.ImgIndex.Count > 0)
+            {
+                foreach (var imgIndex in commentUpdateRequest.ImgIndex)
+                {
+                    if (comment.Imgs != null && imgIndex >= 0 && imgIndex < comment.Imgs.Count)
+                    {
+                        var imgFile = commentUpdateRequest.Imgs[imgIndex];
+                        using (var ms = new MemoryStream())
+                        {
+                            var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetExtension(imgFile.FileName);
+                            var filePath = Path.Combine("wwwroot/img", uniqueFileName);
+
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await imgFile.CopyToAsync(stream);
+                            }
+
+                            comment.Imgs[imgIndex] = $"http://localhost:5273/img/{uniqueFileName}";
+                        }
+                    }
+                    else
+                    {
+                        return BadRequest($"Неверный индекс изображения: {imgIndex}");
+                    }
+                }
+            }
+
+            _context.SaveChangesAsync();
+            return Ok(comment);
+        }
+
+        [HttpDelete("deleted-comment/{id}")]
+        public async Task<IActionResult> DeleteComment(int id)
+        {
             var comment = await _context.Comment.FindAsync(id);
+
             if (comment == null)
             {
                 return NotFound();
             }
 
             _context.Comment.Remove(comment);
-            await _context.SaveChangesAsync();
+            _context.SaveChangesAsync();
 
             return NoContent();
         }
