@@ -9,9 +9,9 @@ export default {
 <template>
   <v-main>
     {{ post}}
-    <v-card v-for="item in">
-      
-    </v-card>
+<!--    <v-card v-for="item in">-->
+<!--      -->
+<!--    </v-card>-->
   </v-main>
 </template>
 

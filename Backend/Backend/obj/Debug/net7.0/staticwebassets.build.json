@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "oCMEmm9SVelMMPptsbo0RyTkFIWH1bU8qP8CD+Z7COY=",
+  "Hash": "dDBpMtUCcN5N2JM7akaL9subIWk4JfT1NB61ft08YQI=",
   "Source": "Backend",
   "BasePath": "_content/Backend",
   "Mode": "Default",
@@ -17,6 +17,23 @@
   ],
   "Assets": [
     {
+      "Identity": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\img\\3b6d4599-f6ba-4c66-bb50-8f490d72feb2_.jpg",
+      "SourceId": "Backend",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\",
+      "BasePath": "_content/Backend",
+      "RelativePath": "img/3b6d4599-f6ba-4c66-bb50-8f490d72feb2_.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\img\\3b6d4599-f6ba-4c66-bb50-8f490d72feb2_.jpg"
+    },
+    {
       "Identity": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\img\\4e6e08e5-2bae-45a0-b346-dbda3eb7443e_.jpg",
       "SourceId": "Backend",
       "SourceType": "Discovered",
@@ -32,6 +49,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\img\\4e6e08e5-2bae-45a0-b346-dbda3eb7443e_.jpg"
+    },
+    {
+      "Identity": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\img\\babfa194-3e11-47ca-b05a-cf37534e085c_.jpg",
+      "SourceId": "Backend",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\",
+      "BasePath": "_content/Backend",
+      "RelativePath": "img/babfa194-3e11-47ca-b05a-cf37534e085c_.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\img\\babfa194-3e11-47ca-b05a-cf37534e085c_.jpg"
     },
     {
       "Identity": "C:\\prod\\chichopa\\Backend\\Backend\\wwwroot\\img\\bbc1d905-12e6-49cd-b434-39c09fe614de_.jpg",

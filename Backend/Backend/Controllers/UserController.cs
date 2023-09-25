@@ -96,7 +96,7 @@ namespace Backend.Controllers
                 Password = userRequest.Password,
                 Mail = userRequest.Mail,
                 Avatar = "http://localhost:5273/img/29acce9d-9d4f-4583-b2f2-319a3b58134c_.jpg",
-                Role = "User",
+                Role = RoleType.Developer,
             };
 
             _context.User.Add(entity);
@@ -108,7 +108,7 @@ namespace Backend.Controllers
                 new Claim(ClaimTypes.Name, entity.Login),
                 new Claim(ClaimTypes.Email, entity.Mail),
                 new Claim(ClaimTypes.Uri, entity.Avatar),
-                new Claim(ClaimTypes.Role, entity.Role),
+                new Claim(ClaimTypes.Role, entity.Role.ToString())
             };
 
             var indentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -136,7 +136,7 @@ namespace Backend.Controllers
                 new Claim(ClaimTypes.NameIdentifier, authUser.Id.ToString()),
                 new Claim(ClaimTypes.Name, authUser.Login),
                 new Claim(ClaimTypes.Email, authUser.Mail),
-                new Claim(ClaimTypes.Role, authUser.Role),
+                new Claim(ClaimTypes.Role, authUser.Role.ToString()),
                 new Claim(ClaimTypes.Uri, authUser.Avatar),
             };
 

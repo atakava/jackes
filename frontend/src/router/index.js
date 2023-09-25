@@ -4,6 +4,7 @@ import RegisterPage from "@/components/RegisterUser/RegisterPage.vue";
 import LoginPage from "@/components/RegisterUser/LoginPage.vue";
 import TestPAge from "@/components/Home/TestPAge.vue";
 import HomePage from "@/components/Home/HomePage.vue";
+import ChatPage from "@/components/Chat/ChatPage.vue";
 
 Vue.use(VueRouter)
 
@@ -27,6 +28,11 @@ const routes = [
         path: '/home',
         name: 'home',
         component: HomePage
+    },
+    {
+        path: '/chat',
+        name: 'chat',
+        component: ChatPage
     }
 ]
 
